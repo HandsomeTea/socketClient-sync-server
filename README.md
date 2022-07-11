@@ -2,23 +2,23 @@
 
 ## 连接到服务
 
-- 地址：ws://{host}:3207/bizconf/equipment
+- 地址：ws://{host}:3207/sync/server
 
-- web端连接与会议室终端app连接的区分：
+- web端连接与服务端连接的区分：
 
   - web端连接，在连接websocket的`headers`中加入：
 
     ```js
     {
-        'websocket-accept-sign': 'portal'
+        'websocket-accept-sign': 'client'
     }
     ```
 
-  - 会议室终端app连接，在连接websocket的`headers`中加入：
+  - 服务端连接，在连接websocket的`headers`中加入：
 
     ```js
     {
-        'websocket-accept-sign': 'equipment'
+        'websocket-accept-sign': 'service'
     }
     ```
 
