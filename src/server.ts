@@ -103,10 +103,11 @@ export default (socket: SurpassSocket, msg: EquipmentMessage): void => {
                     if (!errorCode && method === 'login') {
                         _socket.isLogin = true;
                     }
-                } else if (!errorCode) {
-                    log('service-send').info({ type: 'notice', method, data });
-                    _socket.send(JSON.stringify({ type: 'notice', method, data } as EquipmentMessage));
                 }
+                // else if (!errorCode) {
+                //     log('service-send').info({ type: 'notice', method, data });
+                //     _socket.send(JSON.stringify({ type: 'notice', method, data } as EquipmentMessage));
+                // }
             }
         }
     }
