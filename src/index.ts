@@ -47,9 +47,9 @@ export default (server: Server): void => {
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
             if (arg.errorCode) {
-                log(`send-from-${from}`).error(JSON.stringify(arg, null, '   '));
+                log(`${from}-send`).error(JSON.stringify(arg, null, '   '));
             } else {
-                log(`send-from-${from}`).info(JSON.stringify(arg, null, '   '));
+                log(`${from}-send`).info(JSON.stringify(arg, null, '   '));
             }
             socket.send(JSON.stringify(arg));
         };
@@ -61,7 +61,7 @@ export default (server: Server): void => {
             global.ServiceCount++;
         }
 
-        log(`${socket.from}-connect`).info(`connect success, ip: ${req.socket.remoteAddress}. service count is ${global.ServiceCount}. client count is ${global.ClientCount}.`);
+        log('connection').info(`${socket.from} connect success, ip: ${req.socket.remoteAddress}. service count is ${global.ServiceCount}. client count is ${global.ClientCount}.`);
 
         socket.transfer({
             type: 'system',
