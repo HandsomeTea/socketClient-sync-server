@@ -1,5 +1,5 @@
 import { SurpassSocket } from '../socket';
-import { messageError, freeMethods, authMethods } from '@/configs';
+import { messageError, freeMethods, authMethods, getENV } from '@/configs';
 
 export default (socket: SurpassSocket, message: PortalMessage): void => {
     if (global.ServiceCount === 0) {
@@ -22,7 +22,7 @@ export default (socket: SurpassSocket, message: PortalMessage): void => {
     }
 
     // service-client多对多时，客户端必须指明向哪个服务器发
-    if (global.ServiceCount > 1 && !service) {
+    if (getENV('SERVICE_MODE') === 'multi' && !service) {
         return socket.transfer({
             id,
             type: 'system',
@@ -97,12 +97,12 @@ export default (socket: SurpassSocket, message: PortalMessage): void => {
 
     for (const _socket of global.SocketServer.wsClients) {
         if (_socket.from === 'service') {
-            if (global.ServiceCount > 1) {
+            if (getENV('SERVICE_MODE') === 'single') {
+                _socket.transfer({ id, type, method, data }, 'client');
+            } else {
                 if (_socket.serviceId === service) {
                     _socket.transfer({ id, type, method, data }, 'client');
                 }
-            } else {
-                _socket.transfer({ id, type, method, data }, 'client');
             }
         }
     }

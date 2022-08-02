@@ -3,6 +3,7 @@ interface EnvConfigType {
     NODE_ENV: 'development' | 'production' | 'test'
     SERVER_NAME: string
     PORT: string
+    SERVICE_MODE: 'single' | 'multi'
     LOG_LEVEL?: 'all' | 'mark' | 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal' | 'off'
     TRACE_LOG_LEVEL?: 'all' | 'mark' | 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal' | 'off'
     DEV_LOG_LEVEL?: 'all' | 'mark' | 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal' | 'off'
@@ -12,6 +13,7 @@ const developConfig: EnvConfigType = {
     NODE_ENV: 'development',
     SERVER_NAME: 'personal server',
     PORT: '3207',
+    SERVICE_MODE: 'single',
     LOG_LEVEL: 'all',
     TRACE_LOG_LEVEL: 'all',
     DEV_LOG_LEVEL: 'all',

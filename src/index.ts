@@ -1,6 +1,6 @@
 import { Server } from 'http';
 
-import { log, messageError } from '@/configs';
+import { getENV, log, messageError } from '@/configs';
 import clientMsgDeal from '@/client';
 import serviceMsgDeal from '@/server';
 import { WebSocketServer } from '../socket';
@@ -19,7 +19,6 @@ export default (server: Server): void => {
         });
 
         const sign = req.headers['websocket-accept-sign']?.toString() as undefined | SocketType;
-        const serviceId = req.headers['websocket-accept-sign-id']?.toString() as undefined | string;
 
         if (!(sign === 'client' || sign === 'service')) {
             socket.send(JSON.stringify({
@@ -34,7 +33,7 @@ export default (server: Server): void => {
 
         if (sign === 'service') {
             // service-client一对多的情况
-            if (!serviceId) {
+            if (getENV('SERVICE_MODE') === 'single') {
                 if (global.ServiceCount > 0) {
                     socket.send(JSON.stringify({
                         type: 'system',
@@ -60,8 +59,21 @@ export default (server: Server): void => {
         }
 
         socket.from = sign;
-        if (sign === 'service') {
-            socket.serviceId = serviceId || '';
+
+        if (sign === 'service' && getENV('SERVICE_MODE') === 'multi') {
+            const serviceId = req.headers['websocket-accept-sign-id']?.toString() as undefined | string;
+
+            if (!serviceId) {
+                socket.send(JSON.stringify({
+                    type: 'system',
+                    method: 'connect',
+                    errorCode: messageError.CONNECT_NO_PERMISSION,
+                    message: 'the service connection must have sign-id'
+                } as SystemMessage));
+                socket.close();
+                return;
+            }
+            socket.serviceId = serviceId;
         }
         socket.transfer = (arg: PortalMessage | EquipmentMessage | SystemMessage, from: 'system' | 'client' | 'service') => {
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -81,7 +93,7 @@ export default (server: Server): void => {
             global.ServiceCount++;
         }
 
-        log('connection').info(`${socket.from} connect success, ip: ${req.socket.remoteAddress}. service count is ${global.ServiceCount}. client count is ${global.ClientCount}.`);
+        log('connection').debug(`${socket.from} connect success, ip: ${req.socket.remoteAddress}. service count is ${global.ServiceCount}. client count is ${global.ClientCount}.`);
 
         socket.transfer({
             type: 'system',

@@ -1,5 +1,5 @@
 import { SurpassSocket } from '../socket';
-import { messageError } from '@/configs';
+import { getENV, messageError } from '@/configs';
 
 export default (socket: SurpassSocket, msg: EquipmentMessage): void => {
     if (global.ClientCount === 0) {
@@ -42,7 +42,7 @@ export default (socket: SurpassSocket, msg: EquipmentMessage): void => {
     }
 
     // service-client多对多时，服务器的通知必须带自己的标识
-    if (type === 'notice' && global.ServiceCount > 1 && !service) {
+    if (type === 'notice' && getENV('SERVICE_MODE') === 'multi' && !service) {
         return socket.transfer({
             type: 'system',
             method: method || 'unknown',
@@ -95,7 +95,7 @@ export default (socket: SurpassSocket, msg: EquipmentMessage): void => {
         if (_socket.from === 'client') {
             if (type === 'notice' && !errorCode) {
                 _socket.transfer({
-                    ...global.ServiceCount > 1 ? { service } : {},
+                    ...getENV('SERVICE_MODE') === 'multi' ? { service } : {},
                     type, method, data
                 }, 'service');
             } else {
