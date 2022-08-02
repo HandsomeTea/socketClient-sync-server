@@ -22,6 +22,8 @@ declare interface SystemMessage {
 
 declare interface EquipmentMessage {
     id?: string
+    /** serviceId，type为notice时必须 */
+    service?: string
     type: 'notice' | 'order-result' | 'response'
     method: string
     data: any
@@ -31,6 +33,8 @@ declare interface EquipmentMessage {
 
 declare interface PortalMessage {
     id: string
+    /** serviceId，多服务器时必须 */
+    service?: string
     type: 'request' | 'order'
     /** 默认所有的method都需要登录才能调用 */
     method: string

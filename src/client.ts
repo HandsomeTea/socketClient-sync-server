@@ -10,7 +10,7 @@ export default (socket: SurpassSocket, message: PortalMessage): void => {
         } as SystemMessage, 'system');
     }
 
-    const { id, type, method, data } = message;
+    const { id, service, type, method, data } = message;
 
     if (!id) {
         return socket.transfer({
@@ -18,6 +18,17 @@ export default (socket: SurpassSocket, message: PortalMessage): void => {
             method: method || 'unknown',
             errorCode: messageError.MISSING_FIELD_ID,
             message: 'message is missing [id] field!'
+        } as SystemMessage, 'system');
+    }
+
+    // service-client多对多时，客户端必须指明向哪个服务器发
+    if (global.ServiceCount > 1 && !service) {
+        return socket.transfer({
+            id,
+            type: 'system',
+            method: method || 'unknown',
+            errorCode: messageError.MISSING_FIELD_SERVICE,
+            message: 'message is missing [service] field!'
         } as SystemMessage, 'system');
     }
 
@@ -86,7 +97,13 @@ export default (socket: SurpassSocket, message: PortalMessage): void => {
 
     for (const _socket of global.SocketServer.wsClients) {
         if (_socket.from === 'service') {
-            _socket.transfer({ id, type, method, data }, 'client');
+            if (global.ServiceCount > 1) {
+                if (_socket.serviceId === service) {
+                    _socket.transfer({ id, type, method, data }, 'client');
+                }
+            } else {
+                _socket.transfer({ id, type, method, data }, 'client');
+            }
         }
     }
 };

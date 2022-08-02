@@ -19,6 +19,7 @@ export default (server: Server): void => {
         });
 
         const sign = req.headers['websocket-accept-sign']?.toString() as undefined | SocketType;
+        const serviceId = req.headers['websocket-accept-sign-id']?.toString() as undefined | string;
 
         if (!(sign === 'client' || sign === 'service')) {
             socket.send(JSON.stringify({
@@ -31,18 +32,37 @@ export default (server: Server): void => {
             return;
         }
 
-        if (sign === 'service' && global.ServiceCount > 0) {
-            socket.send(JSON.stringify({
-                type: 'system',
-                method: 'connect',
-                errorCode: messageError.EQUIPMENT_OUT_OF_LIMIT,
-                message: 'there can only be one service connection'
-            } as SystemMessage));
-            socket.close();
-            return;
+        if (sign === 'service') {
+            // service-client一对多的情况
+            if (!serviceId) {
+                if (global.ServiceCount > 0) {
+                    socket.send(JSON.stringify({
+                        type: 'system',
+                        method: 'connect',
+                        errorCode: messageError.EQUIPMENT_OUT_OF_LIMIT,
+                        message: 'there can only be one service connection'
+                    } as SystemMessage));
+                    socket.close();
+                    return;
+                }
+            } else { // service-client多对多的情况
+                if (global.ServiceCount === global.ServiceLimit) {
+                    socket.send(JSON.stringify({
+                        type: 'system',
+                        method: 'connect',
+                        errorCode: messageError.EQUIPMENT_OUT_OF_LIMIT,
+                        message: 'the service connection has reached the maximum limit'
+                    } as SystemMessage));
+                    socket.close();
+                    return;
+                }
+            }
         }
 
         socket.from = sign;
+        if (sign === 'service') {
+            socket.serviceId = serviceId || '';
+        }
         socket.transfer = (arg: PortalMessage | EquipmentMessage | SystemMessage, from: 'system' | 'client' | 'service') => {
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore

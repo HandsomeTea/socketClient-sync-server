@@ -10,7 +10,7 @@ export default (socket: SurpassSocket, msg: EquipmentMessage): void => {
         } as SystemMessage, 'system');
     }
 
-    const { id, type, method, data, errorCode, message } = msg;
+    const { id, service, type, method, data, errorCode, message } = msg;
 
     if (!type) {
         return socket.transfer({
@@ -38,6 +38,16 @@ export default (socket: SurpassSocket, msg: EquipmentMessage): void => {
             method: method || 'unknown',
             errorCode: messageError.MISSING_FIELD_ID,
             message: 'message is missing [id] field!'
+        } as SystemMessage, 'system');
+    }
+
+    // service-client多对多时，服务器的通知必须带自己的标识
+    if (type === 'notice' && global.ServiceCount > 1 && !service) {
+        return socket.transfer({
+            type: 'system',
+            method: method || 'unknown',
+            errorCode: messageError.MISSING_FIELD_SERVICE,
+            message: 'message is missing [service] field!'
         } as SystemMessage, 'system');
     }
 
@@ -84,7 +94,10 @@ export default (socket: SurpassSocket, msg: EquipmentMessage): void => {
     for (const _socket of global.SocketServer.wsClients) {
         if (_socket.from === 'client') {
             if (type === 'notice' && !errorCode) {
-                _socket.transfer({ type, method, data }, 'service');
+                _socket.transfer({
+                    ...global.ServiceCount > 1 ? { service } : {},
+                    type, method, data
+                }, 'service');
             } else {
                 if (id && _socket.messageTimerRecord[id]) {
                     clearTimeout(_socket.messageTimerRecord[id]);

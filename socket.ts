@@ -3,7 +3,11 @@ import http from 'http';
 
 export type SurpassSocket = WebSocket & {
     from: SocketType
+    /** service连接专有属性 */
+    serviceId: string
+    /** client连接专有属性 */
     isLogin: boolean
+    /** client连接专有属性 */
     messageTimerRecord: Record<string, NodeJS.Timeout>;
     transfer: (arg: EquipmentMessage | PortalMessage | SystemMessage, from: 'system' | 'client' | 'service') => void
 }
