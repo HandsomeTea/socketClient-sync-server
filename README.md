@@ -19,8 +19,9 @@
     ```js
     {
         'websocket-accept-sign': 'service',
-        /* 多个服务器端时，服务器必须带自己的唯一标识 */
-        'websocket-accept-sign-id': 'xxxxxxx'
+        /* 多个服务器端时，服务器必须带自己的唯一标识信息，其中唯一标识id会做检查 */
+        'websocket-accept-sign-id': 'xxxxxxx',
+        'websocket-accept-sign-name': 'xxxxxxx'
     }
     ```
 
@@ -101,3 +102,17 @@
 - `data`，服务器会检查，相当于http api中请求成功的结果，消息中`data`和`errorCode`必须有一个。
 - `errorCode`，服务器会检查，相当于http api中请求失败的结果，该结果为字符串错误码，不为文字描述，且必须由大写字母和下划线组成，消息中`data`和`errorCode`必须有一个。
 - `message`，服务器会检查，当`errorCode`存在时，必选，是错误的内容描述。
+
+
+
+#### 其他
+
+多服务端模式下，服务器提供`serviceList`method，用于获取服务端列表。操作端请求如下：
+
+```js
+{
+    id: 'xxxxxxx',
+    type: 'response',
+    method: 'serviceList'
+}
+```

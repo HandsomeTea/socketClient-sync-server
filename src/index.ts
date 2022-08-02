@@ -62,6 +62,7 @@ export default (server: Server): void => {
 
         if (sign === 'service' && getENV('SERVICE_MODE') === 'multi') {
             const serviceId = req.headers['websocket-accept-sign-id']?.toString() as undefined | string;
+            const serviceName = req.headers['websocket-accept-sign-name']?.toString() as undefined | string;
 
             if (!serviceId) {
                 socket.send(JSON.stringify({
@@ -74,6 +75,7 @@ export default (server: Server): void => {
                 return;
             }
             socket.serviceId = serviceId;
+            socket.serviceName = serviceName || '';
         }
         socket.transfer = (arg: PortalMessage | EquipmentMessage | SystemMessage, from: 'system' | 'client' | 'service') => {
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment

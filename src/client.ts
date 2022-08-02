@@ -82,6 +82,25 @@ export default (socket: SurpassSocket, message: PortalMessage): void => {
         } as SystemMessage, 'system');
     }
 
+    if (method === 'serviceList' && getENV('SERVICE_MODE') === 'multi') {
+        const result = [];
+
+        for (const _socket of global.SocketServer.wsClients) {
+            if (_socket.from === 'service') {
+                result.push({
+                    id: _socket.serviceId,
+                    name: _socket.serviceName
+                });
+            }
+        }
+        return socket.transfer({
+            id,
+            type: 'response',
+            method: 'serviceList',
+            data: result
+        } as EquipmentMessage, 'system');
+    }
+
     socket.messageTimerRecord[id] = setTimeout(() => {
         socket.transfer({
             id,
