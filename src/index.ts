@@ -7,17 +7,15 @@ import { WebSocketServer } from '../socket';
 
 export default (server: Server): void => {
     global.SocketServer = new WebSocketServer({ path: '/sync/server', server, maxPayload: 0 });
-    console.log(global.SocketServer.options.path);
     global.SocketServer.connection((socket, req) => {
         socket.on('close', () => {
             if (socket.from === 'client') {
                 global.ClientCount--;
-                log('socket-close').debug(`a client socket is offline. service count is ${global.ServiceCount}. client count is ${global.ClientCount}.`);
             }
             if (socket.from === 'service') {
                 global.ServiceCount--;
-                log('socket-close').debug(`a service socket is offline. service count is ${global.ServiceCount}. client count is ${global.ClientCount}.`);
             }
+            log('socket-closed').debug(`a ${socket.from} is offline. service count is ${global.ServiceCount}. client count is ${global.ClientCount}.`);
         });
 
         const sign = req.headers['websocket-accept-sign']?.toString() as undefined | SocketType;
@@ -33,19 +31,28 @@ export default (server: Server): void => {
             return;
         }
 
-        if (sign === 'service' && global.ServiceCount >= global.ServiceLimit) {
-            log('socket').error(`the number of service is limited to ${global.ServiceLimit}. now is ${global.ServiceCount}`);
+        if (sign === 'service' && global.ServiceCount > 0) {
             socket.send(JSON.stringify({
                 type: 'system',
                 method: 'connect',
                 errorCode: messageError.EQUIPMENT_OUT_OF_LIMIT,
-                message: 'service connection is out of limit.'
+                message: 'there can only be one service connection'
             } as SystemMessage));
             socket.close();
             return;
         }
 
         socket.from = sign;
+        socket.transfer = (arg: PortalMessage | EquipmentMessage | SystemMessage, from: 'system' | 'client' | 'service') => {
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            if (arg.errorCode) {
+                log(`send-from-${from}`).error(JSON.stringify(arg, null, '   '));
+            } else {
+                log(`send-from-${from}`).info(JSON.stringify(arg, null, '   '));
+            }
+            socket.send(JSON.stringify(arg));
+        };
 
         if (socket.from === 'client') {
             global.ClientCount++;
@@ -56,11 +63,11 @@ export default (server: Server): void => {
 
         log(`${socket.from}-connect`).info(`connect success, ip: ${req.socket.remoteAddress}. service count is ${global.ServiceCount}. client count is ${global.ClientCount}.`);
 
-        socket.send(JSON.stringify({
+        socket.transfer({
             type: 'system',
             method: 'connect',
             data: 'connected'
-        } as SystemMessage));
+        } as SystemMessage, 'system');
 
         socket.isLogin = false;
         socket.messageTimerRecord = {};

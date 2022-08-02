@@ -1,5 +1,5 @@
 # socketClient-sync-server
-    这是一个基于websocket的客户端和服务端的交互同步服务。
+    这是一个基于websocket的客户端和服务端的交互同步服务，客户端与服务端为多对一关系。
 ## 连接到服务
 
 - 地址：ws://{host}:3207/sync/server

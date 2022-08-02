@@ -5,6 +5,7 @@ export type SurpassSocket = WebSocket & {
     from: SocketType
     isLogin: boolean
     messageTimerRecord: Record<string, NodeJS.Timeout>;
+    transfer: (arg: EquipmentMessage | PortalMessage | SystemMessage, from: 'system' | 'client' | 'service') => void
 }
 
 export class WebSocketServer extends WebSocket.Server {

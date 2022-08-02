@@ -4,7 +4,7 @@ import { WebSocketServer } from '../socket';
 declare global {
     namespace NodeJS {
         interface Global {
-            ServiceLimit: number;
+            // ServiceLimit: number;
             ServiceCount: number;
             ClientCount: number;
             SocketServer: WebSocketServer;

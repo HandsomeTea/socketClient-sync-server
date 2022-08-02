@@ -32,6 +32,7 @@ declare interface EquipmentMessage {
 declare interface PortalMessage {
     id: string
     type: 'request' | 'order'
+    /** 默认所有的method都需要登录才能调用 */
     method: string
     data: any
 }
