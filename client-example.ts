@@ -75,14 +75,14 @@ class WebSocket {
         return `${Date.now() + Math.floor(Math.random() * 1001)}`;
     }
 
-    private async syncSend(type: 'request' | 'order', method: string, data: any): Promise<any> {
+    private async syncSend(type: 'request' | 'order', method: string, data: any, service?: string): Promise<any> {
         if (this.isOK) {
             return null;
         }
         const id = this.id;
 
         this.sendIds.add(id);
-        this.service.send(JSON.stringify({ id, type, method, data }));
+        this.service.send(JSON.stringify({ id, ...service ? { service } : {}, type, method, data }));
 
         return new Promise((resolve, reject) => {
             (this.sendIds.size === 1 ? this.service.removeAllListeners('all') : this.service).on('all', (res: ResponseWsMessage) => {
@@ -100,12 +100,12 @@ class WebSocket {
         });
     }
 
-    async request(method: string, params: any) {
-        return await this.syncSend('request', method, params);
+    async request(method: string, params: any, service?: string) {
+        return await this.syncSend('request', method, params, service);
     }
 
-    async order(command: string, params: any) {
-        return await this.syncSend('order', command, params);
+    async order(command: string, params: any, service?: string) {
+        return await this.syncSend('order', command, params, service);
     }
 
     async listen(method: string, clear = true): Promise<any> {
