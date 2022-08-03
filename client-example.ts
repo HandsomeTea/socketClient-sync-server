@@ -67,7 +67,7 @@ class WebSocket {
     }
 
     private get id() {
-        return `${Date.now()}`;
+        return `${Date.now() + Math.floor(Math.random() * 1001)}`;
     }
 
     private async syncSend(type: 'request' | 'order', method: string, data: any): Promise<any> {
