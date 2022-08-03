@@ -14,13 +14,14 @@ process.on('uncaughtException', reason => {
 interface ResponseWsMessage {
     id?: string
     type: 'system' | 'notice' | 'order-result' | 'response'
+    service?: string
     method: string
     data: any
     errorCode?: string
     message?: string
 }
 
-class WebSocket {
+class WebSocketClient {
     private service!: WS;
     private sendIds: Set<string>;
 
@@ -32,12 +33,21 @@ class WebSocket {
         this.service = new WS('ws://localhost:3207/sync/server', { headers: { 'websocket-accept-sign': 'client' } });
         this.service.removeAllListeners('message').on('message', result => {
             try {
-                const { id, type, method, data, errorCode, message } = JSON.parse(result.toString() as unknown as string) as ResponseWsMessage;
+                const { id, type, service, method, data, errorCode, message } = JSON.parse(result.toString() as unknown as string) as ResponseWsMessage;
 
                 if (id) {
-                    this.service.emit('all', { id, type, method, data, errorCode, message });
+                    this.service.emit('all', {
+                        id, type, method,
+                        ...typeof data !== 'undefined' ? { data } : {},
+                        ...typeof errorCode !== 'undefined' ? { errorCode } : {},
+                        ...typeof message !== 'undefined' ? { message } : {}
+                    });
                 } else {
-                    this.service.emit(method, data);
+                    this.service.emit(method, {
+                        type, method,
+                        ...typeof service !== 'undefined' ? { service } : {},
+                        ...typeof data !== 'undefined' ? { data } : {}
+                    });
                 }
             } catch (e) {
                 //
@@ -68,7 +78,7 @@ class WebSocket {
     }
 
     get isOK() {
-        return this.service.readyState === 1;
+        return this.service?.readyState === 1;
     }
 
     private get id() {
@@ -76,7 +86,7 @@ class WebSocket {
     }
 
     private async syncSend(type: 'request' | 'order', method: string, data: any, service?: string): Promise<any> {
-        if (this.isOK) {
+        if (!this.isOK) {
             return null;
         }
         const id = this.id;
@@ -117,14 +127,21 @@ class WebSocket {
     }
 }
 
-// export default new WebSocket();
+// export default new WebSocketClient();
 
-const webWs = new WebSocket();
+const webWs = new WebSocketClient();
 
 webWs.connect().then(async () => {
     // webWs.request('login', ['sadasdasdsss'])
     // webWs.request('login', ['sadasdasdsss'])
     // webWs.request('login', ['sadasdasdsss'])
+    await webWs.request('login', ['sadasdasd']).then(aa0 => {
+        // eslint-disable-next-line no-console
+        console.log(0, aa0);
+    }).catch(e => {
+        // eslint-disable-next-line no-console
+        console.log(0, e);
+    });
 
     // const aa1 = await webWs.request('login', ['sadasdasd']);
 

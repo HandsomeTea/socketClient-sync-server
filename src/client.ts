@@ -12,25 +12,6 @@ export default (socket: SurpassSocket, message: PortalMessage): void => {
 
     const { id, service, type, method, data } = message;
 
-    // 测试client发送request/order的代码
-    // if (typeof Date.now() === 'number') {
-    //     setTimeout(() => {
-    //         socket.transfer({
-    //             id,
-    //             type: 'response',
-    //             method,
-    //             ...Date.now() % 2 === 0 ? {
-    //                 data
-    //             } : {
-    //                 errorCode: messageError.MISSING_FIELD_ID,
-    //                 message: 'message is missing [id] field!'
-    //             }
-    //         } as EquipmentMessage, 'system');
-    //     }, 5000);
-
-    //     return;
-    // }
-
     if (!id) {
         return socket.transfer({
             type: 'system',

@@ -57,16 +57,6 @@ export default (server: Server): void => {
                 }
             }
         }
-        // 测试client接受notice的代码
-        // else {
-        //     setTimeout(() => {
-        //         socket.send(JSON.stringify({
-        //             type: 'notice',
-        //             method: 'login',
-        //             data: [{ test: 123 }]
-        //         } as EquipmentMessage));
-        //     }, 3000);
-        // }
 
         socket.from = sign;
 
