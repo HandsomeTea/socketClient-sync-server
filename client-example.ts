@@ -55,11 +55,16 @@ class WebSocket {
     }
 
     async connect() {
+        if (this.isOK) {
+            return true;
+        }
         return await this.init();
     }
 
     close() {
-        this.service.close();
+        if (this.isOK) {
+            this.service.close();
+        }
     }
 
     get isOK() {
@@ -71,6 +76,9 @@ class WebSocket {
     }
 
     private async syncSend(type: 'request' | 'order', method: string, data: any): Promise<any> {
+        if (this.isOK) {
+            return null;
+        }
         const id = this.id;
 
         this.sendIds.add(id);
