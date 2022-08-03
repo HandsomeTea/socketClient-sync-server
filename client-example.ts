@@ -109,6 +109,7 @@ class WebSocket {
     }
 }
 
+// export default new WebSocket();
 
 const webWs = new WebSocket();
 
