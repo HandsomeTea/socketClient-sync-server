@@ -107,6 +107,16 @@
 
 #### 其他
 
+服务器提供了method`communicationLinkCount`，供操作端和服务端查询可通讯的socket连接数量，操作端得到的是服务端的连接数量，服务端得到的是操作端的连接数量。请求如下：
+
+```js
+{
+    id: 'xxxxxxx',
+    type: 'xxxxx',
+    method: 'communicationLinkCount'
+}
+```
+
 多服务端模式下，服务器提供`serviceList`method，用于获取服务端列表。操作端请求如下：
 
 ```js

@@ -2,14 +2,6 @@ import { SurpassSocket } from '../socket';
 import { getENV, messageError } from '@/configs';
 
 export default (socket: SurpassSocket, msg: EquipmentMessage): void => {
-    if (global.ClientCount === 0) {
-        return socket.transfer({
-            type: 'system',
-            method: 'communicationLinkCount',
-            data: 0
-        } as SystemMessage, 'system');
-    }
-
     const { id, service, type, method, data, errorCode, message } = msg;
 
     if (!type) {
@@ -88,6 +80,15 @@ export default (socket: SurpassSocket, msg: EquipmentMessage): void => {
             method,
             errorCode: messageError.INVALID_MESSAGE,
             message: 'message is missing [message] field!'
+        } as SystemMessage, 'system');
+    }
+
+    if (method === 'communicationLinkCount') {
+        return socket.transfer({
+            id,
+            type: 'system',
+            method: 'communicationLinkCount',
+            data: global.ClientCount
         } as SystemMessage, 'system');
     }
 

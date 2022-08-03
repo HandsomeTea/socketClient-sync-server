@@ -2,14 +2,6 @@ import { SurpassSocket } from '../socket';
 import { messageError, freeMethods, authMethods, getENV } from '@/configs';
 
 export default (socket: SurpassSocket, message: PortalMessage): void => {
-    if (global.ServiceCount === 0) {
-        return socket.transfer({
-            type: 'system',
-            method: 'communicationLinkCount',
-            data: 0
-        } as SystemMessage, 'system');
-    }
-
     const { id, service, type, method, data } = message;
 
     if (!id) {
@@ -95,10 +87,19 @@ export default (socket: SurpassSocket, message: PortalMessage): void => {
         }
         return socket.transfer({
             id,
-            type: 'response',
+            type: 'system',
             method: 'serviceList',
             data: result
-        } as EquipmentMessage, 'system');
+        } as SystemMessage, 'system');
+    }
+
+    if (method === 'communicationLinkCount') {
+        return socket.transfer({
+            id,
+            type: 'system',
+            method: 'communicationLinkCount',
+            data: global.ServiceCount
+        } as SystemMessage, 'system');
     }
 
     socket.messageTimerRecord[id] = setTimeout(() => {
