@@ -1,6 +1,14 @@
 import './startup';
 import { log, getENV } from '@/configs';
 
+process.on('unhandledRejection', reason => {
+    log('SYSTEM').fatal(reason);
+});
+
+process.on('uncaughtException', reason => {
+    log('SYSTEM').fatal(reason);
+});
+
 import { createServer } from 'http';
 
 const server = createServer();
