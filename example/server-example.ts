@@ -82,6 +82,7 @@ class WebSocketServer {
 const webWs = new WebSocketServer();
 
 webWs.connect().then(async () => {
+    webWs.notice({ name: 'test', params: [{ a: 123 }] });
     webWs.observe('login').then(res => {
         // eslint-disable-next-line no-console
         console.log(res.payload);

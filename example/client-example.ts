@@ -155,4 +155,9 @@ webWs.connect().then(async () => {
     // const aa3 = await webWs.listen('login');
 
     // console.log(111, aa3);
+
+    // webWs.listen('test').then(res => {
+    //     // eslint-disable-next-line no-console
+    //     console.log(1111, res);
+    // });
 });
