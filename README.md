@@ -117,12 +117,12 @@
 }
 ```
 
-多服务端模式下，服务器提供`serviceList`method，用于获取服务端列表。操作端请求如下：
+多服务端模式下，服务器为操作端提供`serviceList`method，用于获取服务端列表。操作端请求如下：
 
 ```js
 {
     id: 'xxxxxxx',
-    type: 'response',
+    type: 'request',
     method: 'serviceList'
 }
 ```

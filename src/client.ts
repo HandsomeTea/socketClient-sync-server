@@ -46,10 +46,10 @@ export default (socket: SurpassSocket, message: PortalMessage): void => {
             errorCode: messageError.MISSING_FIELD_METHOD,
             message: 'message is missing [method] field!'
         } as SystemMessage, 'system => client');
-    } else if (method === 'serviceList' && getENV('SERVICE_MODE') === 'multi') {
+    } else if (method === 'serviceList' && getENV('SERVICE_MODE') === 'multi' && type === 'request') {
         const result = [];
 
-        for (const _socket of global.SocketServer.wsClients) {
+        for (const _socket of Object.values(global.ServiceSocketMap)) {
             if (_socket.attempt.from === 'service') {
                 result.push({
                     id: _socket.attempt.serviceId,
