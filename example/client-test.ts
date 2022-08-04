@@ -20,11 +20,18 @@ client1.connect().then(async () => {
         console.log(3, res3);
     });
 
-    const getNotice1 = await client1.observe('update-service');
-    const getNotice2 = await client2.observe('update-service');
-
-    console.log(11, getNotice1);
-    console.log(22, getNotice2);
+    client1.observe('update-service', getNotice1 => {
+        console.log(11, getNotice1);
+    });
+    client2.observe('update-service', getNotice2 => {
+        console.log(22, getNotice2);
+    });
+    client1.observe('communicationLinkCount', getNotice3 => {
+        console.log(33, getNotice3);
+    });
+    client2.observe('communicationLinkCount', getNotice4 => {
+        console.log(44, getNotice4);
+    });
 });
 
 // describe('single service test', () => {

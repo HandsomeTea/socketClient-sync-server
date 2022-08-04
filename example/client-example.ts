@@ -114,11 +114,7 @@ export default class ClientWebSocket {
         return await this.syncSend('request', method, params, service);
     }
 
-    async observe(method: string, clear = true): Promise<any> {
-        return new Promise(resolve => {
-            (clear ? this.service.removeAllListeners(method) : this.service).on(method, res => {
-                resolve(res);
-            });
-        });
+    observe(method: string, cb: (arg: { type: 'notice' | 'system', service?: string, method: string, data: any }) => void, clear = true) {
+        (clear ? this.service.removeAllListeners(method) : this.service).on(method, cb);
     }
 }

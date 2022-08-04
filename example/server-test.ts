@@ -34,4 +34,8 @@ server.connect().then(async () => {
             }
         });
     }, 7000);
+
+    server.observe('communicationLinkCount', data => {
+        console.log(data);
+    });
 });
