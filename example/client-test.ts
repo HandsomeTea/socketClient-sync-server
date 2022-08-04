@@ -4,9 +4,11 @@ import Client from './client-example';
 
 const client1 = new Client();
 const client2 = new Client();
+const client3 = new Client();
 
 client1.connect().then(async () => {
     await client2.connect();
+    await client3.connect();
     console.log('client1 connected!');
     const res1 = await client1.request('login', { username: 'test', password: '123' });
 

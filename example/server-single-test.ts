@@ -1,10 +1,8 @@
 /* eslint-disable no-console */
-import { ResponseObserveMessage, ServerWebSocket as Server } from './server-example';
+import { ResponseObserveMessage, ServerWebSocket } from './server-example';
 
 
-const server = new Server();
-// const server1 = new Server({ id: 'server-123', name: 'server1' });
-// const server2 = new Server({ id: 'server-456', name: 'server2' });
+const server = new ServerWebSocket();
 
 server.connect().then(async () => {
     console.log('server connected!');
