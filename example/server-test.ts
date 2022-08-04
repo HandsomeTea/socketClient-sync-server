@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import Server from './server-example';
+import { ResponseObserveMessage, ServerWebSocket as Server } from './server-example';
 
 
 const server = new Server();
@@ -8,7 +8,9 @@ const server = new Server();
 
 server.connect().then(async () => {
     console.log('server connected!');
-    server.observe('login', login => {
+    server.observe('login', res => {
+        const login = { ...res } as ResponseObserveMessage;
+
         if (login.payload.username === 'test' && login.payload.password === '123') {
             login.response({
                 data: {

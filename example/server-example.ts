@@ -1,7 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import WS from 'ws';
 
-export default class ServerWebSocket {
+export interface ResponseObserveMessage {
+    payload: any
+    response: (params: { data: any } | { errorCode: string, message: string }) => void
+}
+
+export class ServerWebSocket {
     private service!: WS;
     private serviceId!: string;
     private serviceName!: string;
@@ -44,7 +49,7 @@ export default class ServerWebSocket {
                                 ...params
                             }));
                         }
-                    });
+                    } as ResponseObserveMessage);
                 } else {
                     this.service.emit(method, msg);
                 }
@@ -91,7 +96,7 @@ export default class ServerWebSocket {
         }
     }
 
-    observe(method: string, cb: (arg: { payload: any, response: (params: { data: any } | { errorCode: string, message: string }) => void }) => void) {
+    observe(method: string, cb: (arg: ResponseObserveMessage | SystemMessage) => void) {
         this.service.on(method, cb);
     }
 }
