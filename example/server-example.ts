@@ -23,14 +23,14 @@ export default class ServerWebSocket {
         });
         this.service.removeAllListeners('message').on('message', result => {
             try {
-                const { id, type, method, data } = JSON.parse(result.toString() as unknown as string) as { id: string, type: 'request' | 'order', method: string, data: any };
+                const { id, method, data } = JSON.parse(result.toString() as unknown as string) as { id: string, type: 'request', method: string, data: any };
 
                 this.service.emit(method, {
                     ...data ? { payload: data } : {},
                     response: (params: { data: any } | { errorCode: string, message: string }) => {
                         this.service.send(JSON.stringify({
                             id,
-                            type: type === 'order' ? 'order-result' : 'response',
+                            type: 'response',
                             method,
                             ...params
                         }));

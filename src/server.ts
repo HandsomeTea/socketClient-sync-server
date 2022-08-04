@@ -15,13 +15,13 @@ export default (socket: SurpassSocket, msg: EquipmentMessage): void => {
             errorCode: messageError.MISSING_FIELD_TYPE,
             message: 'message is missing [type] field!'
         } as SystemMessage, 'system => service');
-    } else if (type !== 'notice' && type !== 'order-result' && type !== 'response') {
+    } else if (type !== 'notice' && type !== 'response') {
         return socket.transfer({
             id,
             type: 'system',
             method: method || 'unknown',
             errorCode: messageError.INVALID_MESSAGE_TYPE,
-            message: 'message type is one of ["notice", "order-result", "response"]!'
+            message: 'message type is one of ["notice", "response"]!'
         } as SystemMessage, 'system => service');
     } else if (type !== 'notice' && !id) {
         return socket.transfer({

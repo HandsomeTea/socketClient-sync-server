@@ -30,13 +30,13 @@ export default (socket: SurpassSocket, message: PortalMessage): void => {
             errorCode: messageError.MISSING_FIELD_TYPE,
             message: 'message is missing [type] field!'
         } as SystemMessage, 'system => client');
-    } else if (type !== 'order' && type !== 'request') {
+    } else if (type !== 'request') {
         return socket.transfer({
             id,
             type: 'system',
             method: method || 'unknown',
             errorCode: messageError.INVALID_MESSAGE_TYPE,
-            message: 'message type must be one of ["order", "request"]!'
+            message: 'message type must be one of ["request"]!'
         } as SystemMessage, 'system => client');
     } else if (!method) {
         return socket.transfer({
@@ -53,14 +53,6 @@ export default (socket: SurpassSocket, message: PortalMessage): void => {
             method,
             errorCode: messageError.FORBIDDEN,
             message: 'you need login to do this.'
-        } as SystemMessage, 'system => client');
-    } else if (type === 'order' && !data) {
-        return socket.transfer({
-            id,
-            type: 'system',
-            method,
-            errorCode: messageError.MISSING_FIELD_DATA,
-            message: 'order is missing [data] field!'
         } as SystemMessage, 'system => client');
     } else if (method === 'serviceList' && getENV('SERVICE_MODE') === 'multi') {
         const result = [];
@@ -91,7 +83,7 @@ export default (socket: SurpassSocket, message: PortalMessage): void => {
     socket.attempt.messageTimerRecord[id] = setTimeout(() => {
         socket.transfer({
             id,
-            type: type === 'order' ? 'order-result' : 'response',
+            type: 'response',
             method,
             errorCode: messageError.GATEWAY_TIMEOUT,
             message: 'timeout!'

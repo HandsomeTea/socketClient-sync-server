@@ -65,7 +65,7 @@
 {
     id: string
     service?: string
-    type: 'request' | 'order'
+    type: 'request'
     method: string
     data: any
 }
@@ -73,7 +73,7 @@
 
 - `id`，必选，服务器会检查，消息的唯一标识。
 - `service`，服务器会检查，当多服务端时为必选，表示服务端的唯一标识，用来标明向哪个服务端发送数据。
-- `type`，必选，服务器会检查，request表示操作端向服务端请求一些展示数据或状态数据，order表示操作端向服务端发出操作指令，如关闭摄像头等。
+- `type`，必选，服务器会检查，request表示操作端向服务端请求展示数据或发送擦做指令。
 - `method`，必选，服务器会检查，同系统消息中的`method`。
 - `data`，服务器会检查，当`type`为order时，必选，表示操作端发出的操作指令期望的操作结果，相当于http api中的请求参数；当`type`为request时，该字段可根据需要选填。
 
@@ -87,7 +87,7 @@
 {
     id?: string
     service?: string
-    type: 'notice' | 'order-result' | 'response'
+    type: 'notice' | 'response'
     method: string
     data: any
     errorCode?: string
@@ -97,7 +97,7 @@
 
 - `id`，服务器会检查，当服务端收到操作端的消息时，操作端的消息会带有一个id，服务端对该消息的回复必须也使用这个id，保证通讯准确；当服务端单方面通知操作端时(`type`为notice)，id字段可以没有。
 - `service`，服务器会检查，当为多服务端且`type`为notice时为必选，表示服务端的唯一标识。
-- `type`，必选，服务器会检查，notice表示服务端单方面通知操作端状态或数据变化，order-result表示操作端发出的order消息服务端做出的回复，response表示操作端发出的request消息服务端做出的回复。
+- `type`，必选，服务器会检查，notice表示服务端单方面通知操作端状态或数据变化，response表示操作端发出的request消息服务端做出的回复。
 - `method`，必选，服务器会检查，同系统消息中的`method`。
 - `data`，服务器会检查，相当于http api中请求成功的结果，消息中`data`和`errorCode`必须有一个。
 - `errorCode`，服务器会检查，相当于http api中请求失败的结果，该结果为字符串错误码，不为文字描述，且必须由大写字母和下划线组成，消息中`data`和`errorCode`必须有一个。

@@ -13,7 +13,7 @@ process.on('uncaughtException', reason => {
 
 interface ResponseWsMessage {
     id?: string
-    type: 'system' | 'notice' | 'order-result' | 'response'
+    type: 'system' | 'notice' | 'response'
     service?: string
     method: string
     data: any
@@ -85,7 +85,7 @@ export default class ClientWebSocket {
         return `${Date.now() + Math.floor(Math.random() * 1001)}`;
     }
 
-    private async syncSend(type: 'request' | 'order', method: string, data: any, service?: string): Promise<any> {
+    private async syncSend(type: 'request', method: string, data: any, service?: string): Promise<any> {
         if (!this.isOK) {
             return null;
         }
@@ -112,10 +112,6 @@ export default class ClientWebSocket {
 
     async request(method: string, params: any, service?: string) {
         return await this.syncSend('request', method, params, service);
-    }
-
-    async order(command: string, params: any, service?: string) {
-        return await this.syncSend('order', command, params, service);
     }
 
     async observe(method: string, clear = true): Promise<any> {
