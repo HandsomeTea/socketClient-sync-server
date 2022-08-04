@@ -21,7 +21,7 @@ interface ResponseWsMessage {
     message?: string
 }
 
-class WebSocketClient {
+export default class ClientWebSocket {
     private service!: WS;
     private sendIds: Set<string>;
 
@@ -118,7 +118,7 @@ class WebSocketClient {
         return await this.syncSend('order', command, params, service);
     }
 
-    async listen(method: string, clear = true): Promise<any> {
+    async observe(method: string, clear = true): Promise<any> {
         return new Promise(resolve => {
             (clear ? this.service.removeAllListeners(method) : this.service).on(method, res => {
                 resolve(res);
@@ -126,38 +126,3 @@ class WebSocketClient {
         });
     }
 }
-
-// export default new WebSocketClient();
-
-const webWs = new WebSocketClient();
-
-webWs.connect().then(async () => {
-    // webWs.request('login', ['sadasdasdsss'])
-    // webWs.request('login', ['sadasdasdsss'])
-    // webWs.request('login', ['sadasdasdsss'])
-    await webWs.request('login', ['sadasdasd']).then(aa0 => {
-        // eslint-disable-next-line no-console
-        console.log(0, aa0);
-    }).catch(e => {
-        // eslint-disable-next-line no-console
-        console.log(0, e);
-    });
-
-    // const aa1 = await webWs.request('login', ['sadasdasd']);
-
-    // console.log(1, aa1);
-
-    // setTimeout(async () => {
-    //     const aa2 = await webWs.request('login', ['sadasdasd']);
-
-    //     console.log(11, aa2);
-    // }, 2000)
-    // const aa3 = await webWs.listen('login');
-
-    // console.log(111, aa3);
-
-    // webWs.listen('test').then(res => {
-    //     // eslint-disable-next-line no-console
-    //     console.log(1111, res);
-    // });
-});

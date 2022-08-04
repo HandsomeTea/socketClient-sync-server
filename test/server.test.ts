@@ -1,15 +1,26 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import WS from 'ws';
 
-class WebSocketServer {
+export default class ServerWebSocket {
     private service!: WS;
+    private serviceId!: string;
+    private serviceName!: string;
 
-    constructor() {
-        //
+    constructor(option?: { id: string, name: string }) {
+        if (option) {
+            this.serviceId = option.id;
+            this.serviceName = option.name;
+        }
     }
 
     private async init(): Promise<true> {
-        this.service = new WS('ws://localhost:3207/sync/server', { headers: { 'websocket-accept-sign': 'service' } });
+        this.service = new WS('ws://localhost:3207/sync/server', {
+            headers: {
+                'websocket-accept-sign': 'service',
+                ...this.serviceId ? { 'websocket-accept-sign-id': this.serviceId } : {},
+                ...this.serviceName ? { 'websocket-accept-sign-name': this.serviceName } : {}
+            }
+        });
         this.service.removeAllListeners('message').on('message', result => {
             try {
                 const { id, type, method, data } = JSON.parse(result.toString() as unknown as string) as { id: string, type: 'request' | 'order', method: string, data: any };
@@ -76,18 +87,3 @@ class WebSocketServer {
         });
     }
 }
-
-// export default new WebSocketServer();
-
-const webWs = new WebSocketServer();
-
-webWs.connect().then(async () => {
-    webWs.notice({ name: 'test', params: [{ a: 123 }] });
-    webWs.observe('login').then(res => {
-        // eslint-disable-next-line no-console
-        console.log(res.payload);
-
-        res.response({ data: 'success' });
-        // res.response({ errorCode: 'NO_PERMISSION', message: 'error!' });
-    });
-});

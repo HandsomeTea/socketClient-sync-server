@@ -2,6 +2,9 @@ import { SurpassSocket } from '../socket';
 import { messageError, freeMethods, authMethods, getENV } from '@/configs';
 
 export default (socket: SurpassSocket, message: PortalMessage): void => {
+    if (socket.attempt.from !== 'client') {
+        return;
+    }
     const { id, service, type, method, data } = message;
 
     if (!id) {
@@ -11,10 +14,7 @@ export default (socket: SurpassSocket, message: PortalMessage): void => {
             errorCode: messageError.MISSING_FIELD_ID,
             message: 'message is missing [id] field!'
         } as SystemMessage, 'system');
-    }
-
-    // service-client多对多时，客户端必须指明向哪个服务器发
-    if (getENV('SERVICE_MODE') === 'multi' && !service) {
+    } else if (getENV('SERVICE_MODE') === 'multi' && !service) { // service-client多对多时，客户端必须指明向哪个服务器发
         return socket.transfer({
             id,
             type: 'system',
@@ -22,9 +22,7 @@ export default (socket: SurpassSocket, message: PortalMessage): void => {
             errorCode: messageError.MISSING_FIELD_SERVICE,
             message: 'message is missing [service] field!'
         } as SystemMessage, 'system');
-    }
-
-    if (!type) {
+    } else if (!type) {
         return socket.transfer({
             id,
             type: 'system',
@@ -32,9 +30,7 @@ export default (socket: SurpassSocket, message: PortalMessage): void => {
             errorCode: messageError.MISSING_FIELD_TYPE,
             message: 'message is missing [type] field!'
         } as SystemMessage, 'system');
-    }
-
-    if (type !== 'order' && type !== 'request') {
+    } else if (type !== 'order' && type !== 'request') {
         return socket.transfer({
             id,
             type: 'system',
@@ -42,9 +38,7 @@ export default (socket: SurpassSocket, message: PortalMessage): void => {
             errorCode: messageError.INVALID_MESSAGE_TYPE,
             message: 'message type must be one of ["order", "request"]!'
         } as SystemMessage, 'system');
-    }
-
-    if (!method) {
+    } else if (!method) {
         return socket.transfer({
             id,
             type: 'system',
@@ -52,9 +46,7 @@ export default (socket: SurpassSocket, message: PortalMessage): void => {
             errorCode: messageError.MISSING_FIELD_METHOD,
             message: 'message is missing [method] field!'
         } as SystemMessage, 'system');
-    }
-
-    if ((!freeMethods.has(method) || authMethods.has(method)) && !socket.isLogin) {
+    } else if ((!freeMethods.has(method) || authMethods.has(method)) && !socket.attempt.isLogin) {
         return socket.transfer({
             id,
             type: 'system',
@@ -62,9 +54,7 @@ export default (socket: SurpassSocket, message: PortalMessage): void => {
             errorCode: messageError.FORBIDDEN,
             message: 'you need login to do this.'
         } as SystemMessage, 'system');
-    }
-
-    if (type === 'order' && !data) {
+    } else if (type === 'order' && !data) {
         return socket.transfer({
             id,
             type: 'system',
@@ -72,16 +62,14 @@ export default (socket: SurpassSocket, message: PortalMessage): void => {
             errorCode: messageError.MISSING_FIELD_DATA,
             message: 'order is missing [data] field!'
         } as SystemMessage, 'system');
-    }
-
-    if (method === 'serviceList' && getENV('SERVICE_MODE') === 'multi') {
+    } else if (method === 'serviceList' && getENV('SERVICE_MODE') === 'multi') {
         const result = [];
 
         for (const _socket of global.SocketServer.wsClients) {
-            if (_socket.from === 'service') {
+            if (_socket.attempt.from === 'service') {
                 result.push({
-                    id: _socket.serviceId,
-                    name: _socket.serviceName
+                    id: _socket.attempt.serviceId,
+                    name: _socket.attempt.serviceName
                 });
             }
         }
@@ -91,9 +79,7 @@ export default (socket: SurpassSocket, message: PortalMessage): void => {
             method: 'serviceList',
             data: result
         } as SystemMessage, 'system');
-    }
-
-    if (method === 'communicationLinkCount') {
+    } else if (method === 'communicationLinkCount') {
         return socket.transfer({
             id,
             type: 'system',
@@ -102,7 +88,7 @@ export default (socket: SurpassSocket, message: PortalMessage): void => {
         } as SystemMessage, 'system');
     }
 
-    socket.messageTimerRecord[id] = setTimeout(() => {
+    socket.attempt.messageTimerRecord[id] = setTimeout(() => {
         socket.transfer({
             id,
             type: type === 'order' ? 'order-result' : 'response',
@@ -111,19 +97,15 @@ export default (socket: SurpassSocket, message: PortalMessage): void => {
             message: 'timeout!'
         } as EquipmentMessage, 'system');
 
-        clearTimeout(socket.messageTimerRecord[id]);
-        delete socket.messageTimerRecord[id];
+        if (socket.attempt.from === 'client') {
+            clearTimeout(socket.attempt.messageTimerRecord[id]);
+            delete socket.attempt.messageTimerRecord[id];
+        }
     }, 10 * 1000);
 
-    for (const _socket of global.SocketServer.wsClients) {
-        if (_socket.from === 'service') {
-            if (getENV('SERVICE_MODE') === 'single') {
-                _socket.transfer({ id, type, method, data }, 'client');
-            } else {
-                if (_socket.serviceId === service) {
-                    _socket.transfer({ id, type, method, data }, 'client');
-                }
-            }
-        }
+    if (getENV('SERVICE_MODE') === 'single') {
+        global.SingleServiceSocket.transfer({ id, type, method, data }, 'client');
+    } else {
+        global.ServiceSocketMap[service as string].transfer({ id, type, method, data }, 'client');
     }
 };

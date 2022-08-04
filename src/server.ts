@@ -2,6 +2,9 @@ import { SurpassSocket } from '../socket';
 import { getENV, messageError } from '@/configs';
 
 export default (socket: SurpassSocket, msg: EquipmentMessage): void => {
+    if (socket.attempt.from !== 'service') {
+        return;
+    }
     const { id, service, type, method, data, errorCode, message } = msg;
 
     if (!type) {
@@ -12,9 +15,7 @@ export default (socket: SurpassSocket, msg: EquipmentMessage): void => {
             errorCode: messageError.MISSING_FIELD_TYPE,
             message: 'message is missing [type] field!'
         } as SystemMessage, 'system');
-    }
-
-    if (type !== 'notice' && type !== 'order-result' && type !== 'response') {
+    } else if (type !== 'notice' && type !== 'order-result' && type !== 'response') {
         return socket.transfer({
             id,
             type: 'system',
@@ -22,28 +23,21 @@ export default (socket: SurpassSocket, msg: EquipmentMessage): void => {
             errorCode: messageError.INVALID_MESSAGE_TYPE,
             message: 'message type is one of ["notice", "order-result", "response"]!'
         } as SystemMessage, 'system');
-    }
-
-    if (type !== 'notice' && !id) {
+    } else if (type !== 'notice' && !id) {
         return socket.transfer({
             type: 'system',
             method: method || 'unknown',
             errorCode: messageError.MISSING_FIELD_ID,
             message: 'message is missing [id] field!'
         } as SystemMessage, 'system');
-    }
-
-    // service-client多对多时，服务器的通知必须带自己的标识
-    if (type === 'notice' && getENV('SERVICE_MODE') === 'multi' && !service) {
+    } else if (type === 'notice' && getENV('SERVICE_MODE') === 'multi' && !service) { // service-client多对多时，服务器的通知必须带自己的标识
         return socket.transfer({
             type: 'system',
             method: method || 'unknown',
             errorCode: messageError.MISSING_FIELD_SERVICE,
             message: 'message is missing [service] field!'
         } as SystemMessage, 'system');
-    }
-
-    if (!method) {
+    } else if (!method) {
         return socket.transfer({
             id,
             type: 'system',
@@ -51,9 +45,7 @@ export default (socket: SurpassSocket, msg: EquipmentMessage): void => {
             errorCode: messageError.MISSING_FIELD_METHOD,
             message: 'message is missing [method] field!'
         } as SystemMessage, 'system');
-    }
-
-    if (!data && !errorCode) {
+    } else if (!data && !errorCode) {
         return socket.transfer({
             id,
             type: 'system',
@@ -61,9 +53,7 @@ export default (socket: SurpassSocket, msg: EquipmentMessage): void => {
             errorCode: messageError.INVALID_MESSAGE,
             message: 'there must be one of [data] and [errorCode] field!'
         } as SystemMessage, 'system');
-    }
-
-    if (errorCode && !/^[A-Z_]+$/.test(errorCode)) {
+    } else if (errorCode && !/^[A-Z_]+$/.test(errorCode)) {
         return socket.transfer({
             id,
             type: 'system',
@@ -71,9 +61,7 @@ export default (socket: SurpassSocket, msg: EquipmentMessage): void => {
             errorCode: messageError.INVALID_MESSAGE,
             message: '[errorCode] field can only contain uppercase letters and underscores!'
         } as SystemMessage, 'system');
-    }
-
-    if (errorCode && !message) {
+    } else if (errorCode && !message) {
         return socket.transfer({
             id,
             type: 'system',
@@ -81,9 +69,7 @@ export default (socket: SurpassSocket, msg: EquipmentMessage): void => {
             errorCode: messageError.INVALID_MESSAGE,
             message: 'message is missing [message] field!'
         } as SystemMessage, 'system');
-    }
-
-    if (method === 'communicationLinkCount') {
+    } else if (method === 'communicationLinkCount') {
         return socket.transfer({
             id,
             type: 'system',
@@ -92,20 +78,20 @@ export default (socket: SurpassSocket, msg: EquipmentMessage): void => {
         } as SystemMessage, 'system');
     }
 
-    for (const _socket of global.SocketServer.wsClients) {
-        if (_socket.from === 'client') {
+    for (const _socket of global.ClientServices) {
+        if (_socket.attempt.from === 'client') {
             if (type === 'notice' && !errorCode) {
                 _socket.transfer({
                     ...getENV('SERVICE_MODE') === 'multi' ? { service } : {},
                     type, method, data
                 }, 'service');
             } else {
-                if (id && _socket.messageTimerRecord[id]) {
-                    clearTimeout(_socket.messageTimerRecord[id]);
-                    delete _socket.messageTimerRecord[id];
+                if (id && _socket.attempt.messageTimerRecord[id]) {
+                    clearTimeout(_socket.attempt.messageTimerRecord[id]);
+                    delete _socket.attempt.messageTimerRecord[id];
                     _socket.transfer({ id, type, method, data, errorCode, message }, 'service');
                     if (!errorCode && method === 'login') {
-                        _socket.isLogin = true;
+                        _socket.attempt.isLogin = true;
                     }
                 }
             }

@@ -1,15 +1,29 @@
 import WebSocket from 'ws';
 import http from 'http';
 
-export type SurpassSocket = WebSocket & {
-    from: SocketType
-    transfer: (arg: EquipmentMessage | PortalMessage | SystemMessage, from: 'system' | 'client' | 'service') => void
-    /** service连接专有属性 */
-    serviceId: string
-    serviceName: string
-    /** client连接专有属性 */
+interface ServiceWebSocketAttempt {
+    connection: {
+        id: string
+        ip: string
+    }
+    from: 'service'
+    serviceId?: string
+    serviceName?: string
+}
+
+interface ClientWebSocketAttempt {
+    connection: {
+        id: string
+        ip: string
+    }
+    from: 'client'
     isLogin: boolean
     messageTimerRecord: Record<string, NodeJS.Timeout>
+}
+
+export type SurpassSocket = WebSocket & {
+    attempt: ServiceWebSocketAttempt | ClientWebSocketAttempt
+    transfer: (arg: EquipmentMessage | PortalMessage | SystemMessage, from: 'system' | 'client' | 'service') => void
 }
 
 export class WebSocketServer extends WebSocket.Server {

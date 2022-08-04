@@ -1,4 +1,4 @@
-import { WebSocketServer } from '../socket';
+import { WebSocketServer, SurpassSocket } from '../socket';
 
 /**global变量 */
 declare global {
@@ -8,6 +8,9 @@ declare global {
             ServiceCount: number;
             ClientCount: number;
             SocketServer: WebSocketServer;
+            SingleServiceSocket: SurpassSocket;
+            ServiceSocketMap: Record<string, SurpassSocket>;
+            ClientServices: Set<SurpassSocket>;
             Exception: ExceptionConstructor;
         }
     }
