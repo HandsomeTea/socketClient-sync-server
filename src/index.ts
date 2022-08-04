@@ -78,7 +78,6 @@ export default (server: Server): void => {
         }
 
         if (socket.attempt.from === 'client') {
-            socket.attempt.isLogin = false;
             socket.attempt.messageTimerRecord = {};
             global.ClientCount++;
         } else {

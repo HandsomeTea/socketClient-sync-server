@@ -17,7 +17,6 @@ interface ClientWebSocketAttempt {
         ip: string
     }
     from: 'client'
-    isLogin: boolean
     messageTimerRecord: Record<string, NodeJS.Timeout>
 }
 

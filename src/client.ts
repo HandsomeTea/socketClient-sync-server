@@ -1,5 +1,5 @@
 import { SurpassSocket } from '../socket';
-import { messageError, freeMethods, authMethods, getENV } from '@/configs';
+import { messageError, getENV } from '@/configs';
 
 export default (socket: SurpassSocket, message: PortalMessage): void => {
     if (socket.attempt.from !== 'client') {
@@ -45,14 +45,6 @@ export default (socket: SurpassSocket, message: PortalMessage): void => {
             method: 'unknown',
             errorCode: messageError.MISSING_FIELD_METHOD,
             message: 'message is missing [method] field!'
-        } as SystemMessage, 'system => client');
-    } else if ((!freeMethods.has(method) || authMethods.has(method)) && !socket.attempt.isLogin) {
-        return socket.transfer({
-            id,
-            type: 'system',
-            method,
-            errorCode: messageError.FORBIDDEN,
-            message: 'you need login to do this.'
         } as SystemMessage, 'system => client');
     } else if (method === 'serviceList' && getENV('SERVICE_MODE') === 'multi') {
         const result = [];

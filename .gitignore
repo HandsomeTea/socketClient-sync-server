@@ -103,3 +103,4 @@ dist
 # custom
 public
 build
+mark.*

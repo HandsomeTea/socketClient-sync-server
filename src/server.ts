@@ -90,9 +90,6 @@ export default (socket: SurpassSocket, msg: EquipmentMessage): void => {
                     clearTimeout(_socket.attempt.messageTimerRecord[id]);
                     delete _socket.attempt.messageTimerRecord[id];
                     _socket.transfer({ id, type, method, data, errorCode, message }, 'service => client');
-                    if (!errorCode && method === 'login') {
-                        _socket.attempt.isLogin = true;
-                    }
                 }
             }
         }
