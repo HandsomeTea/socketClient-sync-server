@@ -85,13 +85,13 @@ export default (server: Server): void => {
             global.ServiceCount++;
         }
 
-        socket.transfer = (arg: PortalMessage | EquipmentMessage | SystemMessage, from: 'system' | 'client' | 'service') => {
+        socket.transfer = (arg: PortalMessage | EquipmentMessage | SystemMessage, from: 'system => client' | 'system => service' | 'client => service' | 'service => client') => {
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
             if (arg.errorCode) {
-                log(`${from}-send`).error(JSON.stringify(arg, null, '   '));
+                log(from).error(JSON.stringify(arg, null, '   '));
             } else {
-                log(`${from}-send`).info(JSON.stringify(arg, null, '   '));
+                log(from).info(JSON.stringify(arg, null, '   '));
             }
             socket.send(JSON.stringify(arg));
         };
@@ -110,13 +110,13 @@ export default (server: Server): void => {
                     type: 'system',
                     method: 'communicationLinkCount',
                     data: global.ClientCount
-                } as SystemMessage, 'system');
+                } as SystemMessage, 'system => service');
             } else if (socket.attempt.from === 'service' && a.attempt.from === 'client') {
                 a.transfer({
                     type: 'system',
                     method: 'communicationLinkCount',
                     data: global.ServiceCount
-                } as SystemMessage, 'system');
+                } as SystemMessage, 'system => client');
             }
         });
 
@@ -137,7 +137,7 @@ export default (server: Server): void => {
             type: 'system',
             method: 'connect',
             data: 'connected'
-        } as SystemMessage, 'system');
+        } as SystemMessage, `system => ${socket.attempt.from}`);
 
 
         socket.on('ping', ping => {
@@ -156,7 +156,7 @@ export default (server: Server): void => {
                 }
             } catch (e) {
                 log(`receive-from-${socket.attempt.from}`).error('unknown message:');
-                log(`receive-from-${socket.attempt.from}`).error(params);
+                log(`receive-from-${socket.attempt.from}`).error(params.toString());
                 return;
             }
         });

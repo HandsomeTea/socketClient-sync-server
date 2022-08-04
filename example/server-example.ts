@@ -79,11 +79,7 @@ export default class ServerWebSocket {
         }
     }
 
-    async observe(method: string): Promise<{ payload: any, response: (params: { data: any } | { errorCode: string, message: string }) => void }> {
-        return new Promise(resolve => {
-            this.service.on(method, res => {
-                resolve(res);
-            });
-        });
+    observe(method: string, cb: (arg: { payload: any, response: (params: { data: any } | { errorCode: string, message: string }) => void }) => void) {
+        this.service.on(method, cb);
     }
 }

@@ -23,7 +23,7 @@ interface ClientWebSocketAttempt {
 
 export type SurpassSocket = WebSocket & {
     attempt: ServiceWebSocketAttempt | ClientWebSocketAttempt
-    transfer: (arg: EquipmentMessage | PortalMessage | SystemMessage, from: 'system' | 'client' | 'service') => void
+    transfer: (arg: EquipmentMessage | PortalMessage | SystemMessage, from: 'system => client' | 'system => service' | 'client => service' | 'service => client') => void
 }
 
 export class WebSocketServer extends WebSocket.Server {
