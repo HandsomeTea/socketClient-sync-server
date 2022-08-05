@@ -5,6 +5,5 @@ import { updateOrCreateLogInstance } from '@/configs';
 updateOrCreateLogInstance();
 
 global.ClientServices = new Set();
+global.ServiceSocketMap = {};
 global.ServiceLimit = 1;
-global.ServiceCount = 0;
-global.ClientCount = 0;

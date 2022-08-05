@@ -1,5 +1,6 @@
 import { ServiceWebSocketAttempt, SurpassSocket } from '../socket';
 import { messageError, getENV } from '@/configs';
+import { getServiceCount } from './lib';
 
 export default (socket: SurpassSocket, message: PortalMessage): void => {
     if (socket.attempt.from !== 'client') {
@@ -68,7 +69,7 @@ export default (socket: SurpassSocket, message: PortalMessage): void => {
             id,
             type: 'system',
             method: 'communicationLinkCount',
-            data: global.ServiceCount
+            data: getServiceCount()
         } as SystemMessage, { from: 'system', to: 'client' });
     }
 
@@ -88,7 +89,7 @@ export default (socket: SurpassSocket, message: PortalMessage): void => {
     }, 10 * 1000);
 
     if (getENV('SERVICE_MODE') === 'single') {
-        global.SingleServiceSocket.transfer({ id, type, method, data }, { from: 'client', to: 'service' });
+        global.SingleServiceSocket?.transfer({ id, type, method, data }, { from: 'client', to: 'service' });
     } else {
         const { serviceId, serviceName } = global.ServiceSocketMap[service as string].attempt as ServiceWebSocketAttempt;
 

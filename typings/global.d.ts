@@ -5,10 +5,8 @@ declare global {
     namespace NodeJS {
         interface Global {
             ServiceLimit: number;
-            ServiceCount: number;
-            ClientCount: number;
             SocketServer: WebSocketServer;
-            SingleServiceSocket: SurpassSocket;
+            SingleServiceSocket: SurpassSocket | undefined;
             ServiceSocketMap: Record<string, SurpassSocket>;
             ClientServices: Set<SurpassSocket>;
             Exception: ExceptionConstructor;

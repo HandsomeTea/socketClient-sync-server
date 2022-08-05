@@ -75,7 +75,7 @@ export default (socket: SurpassSocket, msg: EquipmentMessage): void => {
             id,
             type: 'system',
             method: 'communicationLinkCount',
-            data: global.ClientCount
+            data: global.ClientServices.size
         } as SystemMessage, { from: 'system', to: 'service', serviceId, serviceName });
     }
 

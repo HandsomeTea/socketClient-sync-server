@@ -13,7 +13,7 @@ const developConfig: EnvConfigType = {
     NODE_ENV: 'development',
     SERVER_NAME: 'personal server',
     PORT: '3207',
-    SERVICE_MODE: 'single',
+    SERVICE_MODE: 'multi',
     LOG_LEVEL: 'all',
     TRACE_LOG_LEVEL: 'all',
     DEV_LOG_LEVEL: 'all',
