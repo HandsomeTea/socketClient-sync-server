@@ -184,8 +184,6 @@ export default (server: Server): void => {
         });
 
         socket.on('close', () => {
-            log('socket-closed').debug(`a ${socket.attempt.from} is offline. service count is ${getServiceCount()}. client count is ${global.ClientServices.size}.`);
-
             if (socket.attempt.from === 'client') {
                 global.ClientServices.delete(socket);
             } else {
@@ -197,6 +195,7 @@ export default (server: Server): void => {
                     delete global.ServiceSocketMap[serviceId as string];
                 }
             }
+            log('socket-closed').debug(`a ${socket.attempt.from} is offline. service count is ${getServiceCount()}. client count is ${global.ClientServices.size}.`);
         });
     });
 };
