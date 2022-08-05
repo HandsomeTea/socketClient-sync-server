@@ -85,10 +85,10 @@ export class ServerWebSocket {
         return this.service?.readyState === 1;
     }
 
-    notice(arg: { service?: string, name: string, params: any }) {
+    notice(arg: { name: string, params: any }) {
         if (this.isOK) {
             this.service.send(JSON.stringify({
-                service: arg.service,
+                ...this.serviceId ? { service: this.serviceId } : {},
                 type: 'notice',
                 method: arg.name,
                 data: arg.params

@@ -6,4 +6,4 @@ updateOrCreateLogInstance();
 
 global.ClientServices = new Set();
 global.ServiceSocketMap = {};
-global.ServiceLimit = 1;
+global.ServiceLimit = 3;

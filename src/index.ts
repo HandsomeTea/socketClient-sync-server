@@ -120,8 +120,6 @@ export default (server: Server): void => {
         };
         // ======================================连接处理结束==========================================================================
 
-        log('connection').debug(`${socket.attempt.from} connect success, ip: ${socket.attempt.connection.ip}. service count is ${getServiceCount()}. client count is ${global.ClientServices.size}.`);
-
         // 通知除了当前连接之外的其他连接：有新的连接上线
         [
             ...global.ClientServices,
@@ -152,6 +150,8 @@ export default (server: Server): void => {
                 global.ServiceSocketMap[serviceId as string] = socket;
             }
         }
+
+        log('connection').debug(`${socket.attempt.from} connect success, ip: ${socket.attempt.connection.ip}. service count is ${getServiceCount()}. client count is ${global.ClientServices.size}.`);
 
         socket.transfer({
             type: 'system',
@@ -186,14 +186,32 @@ export default (server: Server): void => {
         socket.on('close', () => {
             if (socket.attempt.from === 'client') {
                 global.ClientServices.delete(socket);
+
+                [
+                    ...Object.values(global.ServiceSocketMap),
+                    ...global.SingleServiceSocket ? [global.SingleServiceSocket] : []
+                ].map(a => {
+                    a.transfer({
+                        type: 'system',
+                        method: 'communicationLinkCount',
+                        data: global.ClientServices.size
+                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                        // @ts-ignore
+                    } as SystemMessage, { from: 'system', to: 'service', serviceId: a.attempt.serviceId, serviceName: a.attempt.serviceName });
+                });
             } else {
                 if (getENV('SERVICE_MODE') === 'single') {
-                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                    // @ts-ignore
                     delete global.SingleServiceSocket;
                 } else {
                     delete global.ServiceSocketMap[serviceId as string];
                 }
+                [...global.ClientServices].map(a => {
+                    a.transfer({
+                        type: 'system',
+                        method: 'communicationLinkCount',
+                        data: getServiceCount()
+                    } as SystemMessage, { from: 'system', to: 'client' });
+                });
             }
             log('socket-closed').debug(`a ${socket.attempt.from} is offline. service count is ${getServiceCount()}. client count is ${global.ClientServices.size}.`);
         });
