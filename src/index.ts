@@ -6,20 +6,38 @@ import clientMsgDeal from '@/client';
 import serviceMsgDeal from '@/server';
 import { TransferType, WebSocketServer } from '../socket';
 
+const getMessageFrom = (mark: TransferType) => {
+    const serviceMrak = getENV('SERVICE_MODE') === 'multi' ? `[${mark.serviceId}:${mark.serviceName}]` : '';
+    let from = '';
+
+    from += mark.from === 'service' ? `service${serviceMrak}` : mark.from;
+    from += ' => ';
+    from += mark.to === 'service' ? `service${serviceMrak}` : mark.to;
+
+    return from;
+};
+
 export default (server: Server): void => {
     global.SocketServer = new WebSocketServer({ path: '/sync/server', server, maxPayload: 0 });
 
     global.SocketServer.connection((socket, request) => {
         const sign = request.headers['websocket-accept-sign']?.toString() as undefined | SocketType;
+        const serviceId = request.headers['websocket-accept-sign-id']?.toString() as undefined | string;
+        const serviceName = request.headers['websocket-accept-sign-name']?.toString() as undefined | string;
 
         if (!(sign === 'client' || sign === 'service')) {
-            socket.send(JSON.stringify({
+            const message = {
                 type: 'system',
                 method: 'connect',
                 errorCode: messageError.CONNECT_NO_PERMISSION,
                 message: 'connection is neither the service side nor the client side!'
-            } as SystemMessage));
+            } as SystemMessage;
+
+            socket.send(JSON.stringify(message));
             socket.close();
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            log(getMessageFrom({ from: 'system', to: sign })).error(JSON.stringify(message, null, '   '));
             return;
         }
 
@@ -27,24 +45,30 @@ export default (server: Server): void => {
             // service-client一对多的情况
             if (getENV('SERVICE_MODE') === 'single') {
                 if (global.ServiceCount > 0) {
-                    socket.send(JSON.stringify({
+                    const message = {
                         type: 'system',
                         method: 'connect',
                         errorCode: messageError.EQUIPMENT_OUT_OF_LIMIT,
                         message: 'there can only be one service connection'
-                    } as SystemMessage));
+                    } as SystemMessage;
+
+                    socket.send(JSON.stringify(message));
                     socket.close();
+                    log(getMessageFrom({ from: 'system', to: sign })).error(JSON.stringify(message, null, '   '));
                     return;
                 }
             } else { // service-client多对多的情况
                 if (global.ServiceCount === global.ServiceLimit) {
-                    socket.send(JSON.stringify({
+                    const message = {
                         type: 'system',
                         method: 'connect',
                         errorCode: messageError.EQUIPMENT_OUT_OF_LIMIT,
                         message: 'the service connection has reached the maximum limit'
-                    } as SystemMessage));
+                    } as SystemMessage;
+
+                    socket.send(JSON.stringify(message));
                     socket.close();
+                    log(getMessageFrom({ from: 'system', to: sign, serviceId, serviceName })).error(JSON.stringify(message, null, '   '));
                     return;
                 }
             }
@@ -60,17 +84,17 @@ export default (server: Server): void => {
         };
 
         if (socket.attempt.from === 'service' && getENV('SERVICE_MODE') === 'multi') {
-            const serviceId = request.headers['websocket-accept-sign-id']?.toString() as undefined | string;
-            const serviceName = request.headers['websocket-accept-sign-name']?.toString() as undefined | string;
-
             if (!serviceId) {
-                socket.send(JSON.stringify({
+                const message = {
                     type: 'system',
                     method: 'connect',
                     errorCode: messageError.CONNECT_NO_PERMISSION,
                     message: 'the service connection must have sign-id'
-                } as SystemMessage));
+                } as SystemMessage;
+
+                socket.send(JSON.stringify(message));
                 socket.close();
+                log(getMessageFrom({ from: 'system', to: sign, serviceId, serviceName })).error(JSON.stringify(message, null, '   '));
                 return;
             }
             socket.attempt.serviceId = serviceId;
@@ -85,12 +109,7 @@ export default (server: Server): void => {
         }
 
         socket.transfer = (arg: PortalMessage | EquipmentMessage | SystemMessage, mark: TransferType) => {
-            const serviceMrak = getENV('SERVICE_MODE') === 'multi' ? `[${mark.serviceId}:${mark.serviceName}]` : '';
-            let from = '';
-
-            from += mark.from === 'service' ? `service${serviceMrak}` : mark.from;
-            from += ' => ';
-            from += mark.to === 'service' ? `service${serviceMrak}` : 'client';
+            const from = getMessageFrom(mark);
 
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
@@ -135,7 +154,7 @@ export default (server: Server): void => {
                 if (!global.ServiceSocketMap) {
                     global.ServiceSocketMap = {};
                 }
-                global.ServiceSocketMap[socket.attempt.serviceId as string] = socket;
+                global.ServiceSocketMap[serviceId as string] = socket;
             }
         }
 
@@ -145,7 +164,7 @@ export default (server: Server): void => {
             data: 'connected'
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
-        } as SystemMessage, { from: 'system', to: socket.attempt.from, serviceId: socket.attempt.serviceId, serviceName: socket.attempt.serviceName });
+        } as SystemMessage, { from: 'system', to: socket.attempt.from, serviceId, serviceName });
 
 
         socket.on('ping', ping => {
@@ -186,7 +205,7 @@ export default (server: Server): void => {
                     // @ts-ignore
                     delete global.SingleServiceSocket;
                 } else {
-                    delete global.ServiceSocketMap[socket.attempt.serviceId as string];
+                    delete global.ServiceSocketMap[serviceId as string];
                 }
             }
         });

@@ -6,35 +6,43 @@ const client1 = new Client();
 const client2 = new Client();
 const client3 = new Client();
 
-client1.connect().then(async () => {
-    await client2.connect();
-    await client3.connect();
-    console.log('client1 connected!');
-    const res1 = await client1.request('login', { username: 'test', password: '123' });
+client1.connect().then(() => {
+    client1.observe('connect', async res => {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        if (res.data === 'connected') {
+            await client2.connect();
+            await client3.connect();
+            console.log('client1 connected!');
+            const res1 = await client1.request('login', { username: 'test', password: '123' });
 
-    console.log(1, res1);
+            console.log(1, res1);
 
-    client1.request('login', { username: 'me', password: '123' }).catch(res2 => {
-        console.log(2, res2);
-    });
+            client1.request('login', { username: 'me', password: '123' }).catch(res2 => {
+                console.log(2, res2);
+            });
 
-    client1.request('logins', {}).catch(res3 => {
-        console.log(3, res3);
-    });
+            client1.request('logins', {}).catch(res3 => {
+                console.log(3, res3);
+            });
 
-    client1.observe('update-service', getNotice1 => {
-        console.log(11, getNotice1);
+            client1.observe('update-service', getNotice1 => {
+                console.log(11, getNotice1);
+            });
+            client2.observe('update-service', getNotice2 => {
+                console.log(22, getNotice2);
+            });
+            client1.observe('communicationLinkCount', getNotice3 => {
+                console.log(33, getNotice3);
+            });
+            client2.observe('communicationLinkCount', getNotice4 => {
+                console.log(44, getNotice4);
+            });
+        } else {
+            console.log(res);
+        }
     });
-    client2.observe('update-service', getNotice2 => {
-        console.log(22, getNotice2);
-    });
-    client1.observe('communicationLinkCount', getNotice3 => {
-        console.log(33, getNotice3);
-    });
-    client2.observe('communicationLinkCount', getNotice4 => {
-        console.log(44, getNotice4);
-    });
-});
+}).catch(e => console.log(e));
 
 // describe('single service test', () => {
 //     before(async () => {
