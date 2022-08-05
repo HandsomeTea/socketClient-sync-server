@@ -4,7 +4,7 @@ import crypto from 'crypto';
 import { getENV, log, messageError } from '@/configs';
 import clientMsgDeal from '@/client';
 import serviceMsgDeal from '@/server';
-import { WebSocketServer } from '../socket';
+import { TransferType, WebSocketServer } from '../socket';
 
 export default (server: Server): void => {
     global.SocketServer = new WebSocketServer({ path: '/sync/server', server, maxPayload: 0 });
@@ -84,7 +84,7 @@ export default (server: Server): void => {
             global.ServiceCount++;
         }
 
-        socket.transfer = (arg: PortalMessage | EquipmentMessage | SystemMessage, from: 'system => client' | 'system => service' | 'client => service' | 'service => client') => {
+        socket.transfer = (arg: PortalMessage | EquipmentMessage | SystemMessage, from: TransferType) => {
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
             if (arg.errorCode) {

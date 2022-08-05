@@ -1,7 +1,7 @@
 import WebSocket from 'ws';
 import http from 'http';
 
-interface ServiceWebSocketAttempt {
+export interface ServiceWebSocketAttempt {
     connection: {
         id: string
         ip: string
@@ -11,7 +11,7 @@ interface ServiceWebSocketAttempt {
     serviceName?: string
 }
 
-interface ClientWebSocketAttempt {
+export interface ClientWebSocketAttempt {
     connection: {
         id: string
         ip: string
@@ -20,9 +20,17 @@ interface ClientWebSocketAttempt {
     messageTimerRecord: Record<string, NodeJS.Timeout>
 }
 
+export type TransferType = 'system => client'
+    | 'system => service'
+    | `system => service[${string}:${string}]`
+    | 'client => service'
+    | `client => service[${string}:${string}]`
+    | 'service => client'
+    | `service[${string}:${string}] => client`
+
 export type SurpassSocket = WebSocket & {
     attempt: ServiceWebSocketAttempt | ClientWebSocketAttempt
-    transfer: (arg: EquipmentMessage | PortalMessage | SystemMessage, from: 'system => client' | 'system => service' | 'client => service' | 'service => client') => void
+    transfer: (arg: EquipmentMessage | PortalMessage | SystemMessage, from: TransferType) => void
 }
 
 export class WebSocketServer extends WebSocket.Server {

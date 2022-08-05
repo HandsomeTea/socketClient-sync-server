@@ -1,4 +1,4 @@
-import { SurpassSocket } from '../socket';
+import { ServiceWebSocketAttempt, SurpassSocket } from '../socket';
 import { messageError, getENV } from '@/configs';
 
 export default (socket: SurpassSocket, message: PortalMessage): void => {
@@ -90,6 +90,8 @@ export default (socket: SurpassSocket, message: PortalMessage): void => {
     if (getENV('SERVICE_MODE') === 'single') {
         global.SingleServiceSocket.transfer({ id, type, method, data }, 'client => service');
     } else {
-        global.ServiceSocketMap[service as string].transfer({ id, type, method, data }, 'client => service');
+        const { serviceId, serviceName } = global.ServiceSocketMap[service as string].attempt as ServiceWebSocketAttempt;
+
+        global.ServiceSocketMap[service as string].transfer({ id, type, method, data }, `client => service[${serviceId}:${serviceName}]`);
     }
 };
