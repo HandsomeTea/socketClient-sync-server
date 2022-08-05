@@ -84,7 +84,14 @@ export default (server: Server): void => {
             global.ServiceCount++;
         }
 
-        socket.transfer = (arg: PortalMessage | EquipmentMessage | SystemMessage, from: TransferType) => {
+        socket.transfer = (arg: PortalMessage | EquipmentMessage | SystemMessage, mark: TransferType) => {
+            const serviceMrak = getENV('SERVICE_MODE') === 'multi' ? `[${mark.serviceId}:${mark.serviceName}]` : '';
+            let from = '';
+
+            from += mark.from === 'service' ? `service${serviceMrak}` : mark.from;
+            from += ' => ';
+            from += mark.to === 'service' ? `service${serviceMrak}` : 'client';
+
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
             if (arg.errorCode) {
@@ -109,13 +116,13 @@ export default (server: Server): void => {
                     type: 'system',
                     method: 'communicationLinkCount',
                     data: global.ClientCount
-                } as SystemMessage, 'system => service');
+                } as SystemMessage, { from: 'system', to: 'service', serviceId: a.attempt.serviceId, serviceName: a.attempt.serviceName });
             } else if (socket.attempt.from === 'service' && a.attempt.from === 'client') {
                 a.transfer({
                     type: 'system',
                     method: 'communicationLinkCount',
                     data: global.ServiceCount
-                } as SystemMessage, 'system => client');
+                } as SystemMessage, { from: 'system', to: 'client' });
             }
         });
 
@@ -136,7 +143,9 @@ export default (server: Server): void => {
             type: 'system',
             method: 'connect',
             data: 'connected'
-        } as SystemMessage, `system => ${socket.attempt.from}`);
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+        } as SystemMessage, { from: 'system', to: socket.attempt.from, serviceId: socket.attempt.serviceId, serviceName: socket.attempt.serviceName });
 
 
         socket.on('ping', ping => {

@@ -20,17 +20,16 @@ export interface ClientWebSocketAttempt {
     messageTimerRecord: Record<string, NodeJS.Timeout>
 }
 
-export type TransferType = 'system => client'
-    | 'system => service'
-    | `system => service[${string}:${string}]`
-    | 'client => service'
-    | `client => service[${string}:${string}]`
-    | 'service => client'
-    | `service[${string}:${string}] => client`
+export interface TransferType {
+    from: 'system' | 'client' | 'service',
+    to: 'client' | 'service',
+    serviceId?: string,
+    serviceName?: string
+}
 
 export type SurpassSocket = WebSocket & {
     attempt: ServiceWebSocketAttempt | ClientWebSocketAttempt
-    transfer: (arg: EquipmentMessage | PortalMessage | SystemMessage, from: TransferType) => void
+    transfer: (arg: EquipmentMessage | PortalMessage | SystemMessage, mark: TransferType) => void
 }
 
 export class WebSocketServer extends WebSocket.Server {
