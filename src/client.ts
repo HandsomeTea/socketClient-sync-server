@@ -15,14 +15,6 @@ export default (socket: SurpassSocket, message: PortalMessage): void => {
             errorCode: messageError.MISSING_FIELD_ID,
             message: 'message is missing [id] field!'
         } as SystemMessage, { from: 'system', to: 'client' });
-    } else if (getENV('SERVICE_MODE') === 'multi' && !service) { // service-client多对多时，客户端必须指明向哪个服务器发
-        return socket.transfer({
-            id,
-            type: 'system',
-            method: method || 'unknown',
-            errorCode: messageError.MISSING_FIELD_SERVICE,
-            message: 'message is missing [service] field!'
-        } as SystemMessage, { from: 'system', to: 'client' });
     } else if (!type) {
         return socket.transfer({
             id,
@@ -64,12 +56,20 @@ export default (socket: SurpassSocket, message: PortalMessage): void => {
             method: 'serviceList',
             data: result
         } as SystemMessage, { from: 'system', to: 'client' });
-    } else if (method === 'communicationLinkCount') {
+    } else if (method === 'communicationLinkCount' && type === 'request') {
         return socket.transfer({
             id,
             type: 'system',
             method: 'communicationLinkCount',
             data: getServiceCount()
+        } as SystemMessage, { from: 'system', to: 'client' });
+    } else if (getENV('SERVICE_MODE') === 'multi' && !service) { // service-client多对多时，客户端必须指明向哪个服务器发
+        return socket.transfer({
+            id,
+            type: 'system',
+            method: method || 'unknown',
+            errorCode: messageError.MISSING_FIELD_SERVICE,
+            message: 'message is missing [service] field!'
         } as SystemMessage, { from: 'system', to: 'client' });
     }
 

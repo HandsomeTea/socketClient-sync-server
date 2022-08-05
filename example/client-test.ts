@@ -55,6 +55,10 @@ client1.connect().then(() => {
             client2.observe('nothing', getNotice5 => {
                 console.log(55, getNotice5);
             });
+
+            const res5 = await client2.request('serviceList', {});
+
+            console.log(4, res5);
         } else {
             console.log(res);
         }
