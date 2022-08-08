@@ -1,9 +1,10 @@
 /* eslint-disable no-console */
 import { ResponseObserveMessage, ServerWebSocket } from './server-example';
 
-const server1 = new ServerWebSocket({ id: 'server-123', name: 'server1' });
-const server2 = new ServerWebSocket({ id: 'server-456', name: 'server2' });
-const server3 = new ServerWebSocket({ id: 'server-789', name: 'server3' });
+const address = 'ws://localhost:3207/sync/server';
+const server1 = new ServerWebSocket(address, { id: 'server-123', name: 'server1' });
+const server2 = new ServerWebSocket(address, { id: 'server-456', name: 'server2' });
+const server3 = new ServerWebSocket(address, { id: 'server-789', name: 'server3' });
 
 
 server1.connect().then(() => {

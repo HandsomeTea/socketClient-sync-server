@@ -1,10 +1,10 @@
 /* eslint-disable no-console */
 import Client from './client-example';
 
-
-const client1 = new Client();
-const client2 = new Client();
-const client3 = new Client();
+const address = 'ws://localhost:3207/sync/server';
+const client1 = new Client(address);
+const client2 = new Client(address);
+const client3 = new Client(address);
 
 client1.connect().then(() => {
     client1.observe('connect', async res => {

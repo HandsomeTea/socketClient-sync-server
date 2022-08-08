@@ -10,8 +10,10 @@ export class ServerWebSocket {
     private service!: WS;
     private serviceId!: string;
     private serviceName!: string;
+    private serverAddress: string;
 
-    constructor(option?: { id: string, name: string }) {
+    constructor(url: string, option?: { id: string, name: string }) {
+        this.serverAddress = url;
         if (option) {
             this.serviceId = option.id;
             this.serviceName = option.name;
@@ -19,7 +21,7 @@ export class ServerWebSocket {
     }
 
     private async init(): Promise<true> {
-        this.service = new WS('ws://localhost:3207/sync/server', {
+        this.service = new WS(this.serverAddress, {
             headers: {
                 'websocket-accept-sign': 'service',
                 ...this.serviceId ? { 'websocket-accept-sign-id': this.serviceId } : {},

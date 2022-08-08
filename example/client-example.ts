@@ -24,13 +24,15 @@ interface ResponseWsMessage {
 export default class ClientWebSocket {
     private service!: WS;
     private sendIds: Set<string>;
+    private serverAddress: string;
 
-    constructor() {
+    constructor(url: string) {
+        this.serverAddress = url;
         this.sendIds = new Set();
     }
 
     private async init(): Promise<true> {
-        this.service = new WS('ws://localhost:3207/sync/server', { headers: { 'websocket-accept-sign': 'client' } });
+        this.service = new WS(this.serverAddress, { headers: { 'websocket-accept-sign': 'client' } });
         this.service.removeAllListeners('message').on('message', result => {
             try {
                 const { id, type, service, method, data, errorCode, message } = JSON.parse(result.toString() as unknown as string) as ResponseWsMessage;

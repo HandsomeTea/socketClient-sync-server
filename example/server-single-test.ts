@@ -2,7 +2,7 @@
 import { ResponseObserveMessage, ServerWebSocket } from './server-example';
 
 
-const server = new ServerWebSocket();
+const server = new ServerWebSocket('ws://localhost:3207/sync/server');
 
 server.connect().then(async () => {
     server.observe('connect', res => {
