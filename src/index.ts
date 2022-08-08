@@ -106,7 +106,7 @@ export default (server: Server): void => {
             socket.attempt.messageTimerRecord = {};
         }
 
-        socket.transfer = (arg: PortalMessage | EquipmentMessage | SystemMessage, mark: TransferType) => {
+        socket.transfer = (arg: ClientMessage | ServerMessage | SystemMessage, mark: TransferType) => {
             const from = getMessageFrom(mark);
 
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment

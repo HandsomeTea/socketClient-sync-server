@@ -1,7 +1,7 @@
 import { SurpassSocket } from '../socket';
 import { getENV, messageError } from '@/configs';
 
-export default (socket: SurpassSocket, msg: EquipmentMessage): void => {
+export default (socket: SurpassSocket, msg: ServerMessage): void => {
     if (socket.attempt.from !== 'service') {
         return;
     }

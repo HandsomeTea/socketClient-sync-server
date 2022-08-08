@@ -2,7 +2,7 @@ import { ServiceWebSocketAttempt, SurpassSocket } from '../socket';
 import { messageError, getENV } from '@/configs';
 import { getServiceCount } from './lib';
 
-export default (socket: SurpassSocket, message: PortalMessage): void => {
+export default (socket: SurpassSocket, message: ClientMessage): void => {
     if (socket.attempt.from !== 'client') {
         return;
     }
@@ -80,7 +80,7 @@ export default (socket: SurpassSocket, message: PortalMessage): void => {
             method,
             errorCode: messageError.GATEWAY_TIMEOUT,
             message: 'timeout!'
-        } as EquipmentMessage, { from: 'system', to: 'client' });
+        } as ServerMessage, { from: 'system', to: 'client' });
 
         if (socket.attempt.from === 'client') {
             clearTimeout(socket.attempt.messageTimerRecord[id]);

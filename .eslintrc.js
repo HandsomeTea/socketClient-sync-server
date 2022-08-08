@@ -20,8 +20,8 @@ module.exports = {
         ExceptionConstructor: true,
         SystemMessage: true,
         SocketType: true,
-        PortalMessage: true,
-        EquipmentMessage: true
+        ClientMessage: true,
+        ServerMessage: true
     },
     rules: {
         '@typescript-eslint/no-explicit-any': 2,

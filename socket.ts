@@ -29,7 +29,7 @@ export interface TransferType {
 
 export type SurpassSocket = WebSocket & {
     attempt: ServiceWebSocketAttempt | ClientWebSocketAttempt
-    transfer: (arg: EquipmentMessage | PortalMessage | SystemMessage, mark: TransferType) => void
+    transfer: (arg: ServerMessage | ClientMessage | SystemMessage, mark: TransferType) => void
 }
 
 export class WebSocketServer extends WebSocket.Server {

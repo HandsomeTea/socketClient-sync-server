@@ -20,7 +20,7 @@ declare interface SystemMessage {
     message?: string
 }
 
-declare interface EquipmentMessage {
+declare interface ServerMessage {
     id?: string
     /** serviceId，type为notice时必须 */
     service?: string
@@ -31,7 +31,7 @@ declare interface EquipmentMessage {
     message?: string
 }
 
-declare interface PortalMessage {
+declare interface ClientMessage {
     id: string
     /** serviceId，多服务器时必须 */
     service?: string
