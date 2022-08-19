@@ -38,7 +38,7 @@ export default (server: Server): void => {
             socket.close();
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
-            log(getMessageFrom({ from: 'system', to: sign })).error(JSON.stringify(message, null, '   '));
+            log(getMessageFrom({ from: 'system', to: sign || 'unknown' })).error(JSON.stringify(message, null, '   '));
             return;
         }
 
